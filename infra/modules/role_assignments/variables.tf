@@ -1,0 +1,9 @@
+variable "resource_group_name"      { type = string }
+variable "key_vault_id"             { type = string }
+variable "cosmos_account_id"        { type = string }
+variable "cosmos_account_name"      { type = string }
+variable "service_bus_namespace_id" { type = string }
+variable "acr_id"                   { type = string }
+variable "storage_account_id"       { type = string }
+variable "api_principal_id"         { type = string }
+variable "worker_principal_id"      { type = string }

@@ -1,0 +1,65 @@
+version: '3.9'
+
+services:
+  cosmos-emulator:
+    image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview
+    ports:
+      - "8081:8081"
+    environment:
+      AZURE_COSMOS_EMULATOR_PARTITION_COUNT: "10"
+      AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE: "true"
+    volumes:
+      - cosmos-data:/tmp/cosmos
+    healthcheck:
+      test: ["CMD", "curl", "-kfs", "https://localhost:8081"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    command: azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0
+
+  api:
+    build:
+      context: .
+      dockerfile: src/AIHarness.API/Dockerfile
+    ports:
+      - "5000:8080"
+    env_file:
+      - .env
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      CosmosDb__AccountEndpoint: "https://cosmos-emulator:8081"
+      CosmosDb__AccountKey: "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b5n8YG1AesDFWk+P/0E/iOD7L/6="
+      BlobStorage__AccountUri: "http://azurite:10000/devstoreaccount1"
+    depends_on:
+      cosmos-emulator:
+        condition: service_healthy
+      azurite:
+        condition: service_started
+
+  worker:
+    build:
+      context: .
+      dockerfile: src/AIHarness.Worker/Dockerfile
+    env_file:
+      - .env
+    environment:
+      DOTNET_ENVIRONMENT: Development
+      CosmosDb__AccountEndpoint: "https://cosmos-emulator:8081"
+      CosmosDb__AccountKey: "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b5n8YG1AesDFWk+P/0E/iOD7L/6="
+      BlobStorage__AccountUri: "http://azurite:10000/devstoreaccount1"
+    depends_on:
+      cosmos-emulator:
+        condition: service_healthy
+      azurite:
+        condition: service_started
+
+volumes:
+  cosmos-data:

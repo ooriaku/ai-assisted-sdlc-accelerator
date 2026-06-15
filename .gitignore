@@ -1,0 +1,50 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.vscode/settings.json
+TestResults/
+*.trx
+coverage.xml
+coverage/
+
+# Docker
+.dockerignore
+
+# Secrets / environment
+.env
+.env.local
+*.pfx
+*.p12
+secrets.json
+appsettings.Local.json
+
+# Azure artifacts
+.azure/
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+*.tfplan
+terraform.tfvars
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# JetBrains
+.idea/
+*.sln.iml
+
+# NuGet
+*.nupkg
+*.snupkg
+nuget.config.local

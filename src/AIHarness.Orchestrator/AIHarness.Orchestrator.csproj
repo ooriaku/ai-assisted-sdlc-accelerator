@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\AIHarness.Agents\AIHarness.Agents.csproj" />
+    <ProjectReference Include="..\AIHarness.Infrastructure\AIHarness.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.77.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.77.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- SK Agents API is still experimental but stable enough for production use -->
+    <NoWarn>$(NoWarn);SKEXP0110;SKEXP0001</NoWarn>
+  </PropertyGroup>
+
+</Project>

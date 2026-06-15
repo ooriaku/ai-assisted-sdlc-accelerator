@@ -1,0 +1,6 @@
+@AIHarness.API_HostAddress = http://localhost:5040
+
+GET {{AIHarness.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,28 @@
+name: Docker Build and Push
+description: Build a Docker image and push it to ACR with SHA and latest tags
+
+inputs:
+  dockerfile:
+    description: Path to the Dockerfile
+    required: true
+  image_name:
+    description: Image name without registry prefix (e.g. aiharness-api)
+    required: true
+  acr_registry:
+    description: ACR registry hostname (e.g. myregistry.azurecr.io)
+    required: true
+  image_tag:
+    description: Image tag (git SHA)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Build and push
+      shell: bash
+      run: |
+        docker build -f ${{ inputs.dockerfile }} \
+          -t "${{ inputs.acr_registry }}/${{ inputs.image_name }}:${{ inputs.image_tag }}" \
+          -t "${{ inputs.acr_registry }}/${{ inputs.image_name }}:latest" .
+        docker push "${{ inputs.acr_registry }}/${{ inputs.image_name }}:${{ inputs.image_tag }}"
+        docker push "${{ inputs.acr_registry }}/${{ inputs.image_name }}:latest"

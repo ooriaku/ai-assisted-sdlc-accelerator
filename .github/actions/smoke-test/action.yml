@@ -1,0 +1,20 @@
+name: Smoke Test
+description: Hit the /health endpoint of the deployed Container App
+
+inputs:
+  environment:
+    description: Target environment (dev | prod)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Health check
+      shell: bash
+      run: |
+        API_URL=$(az containerapp show \
+          --name "aiharness-${{ inputs.environment }}-api" \
+          --resource-group "aiharness-${{ inputs.environment }}-rg" \
+          --query "properties.configuration.ingress.fqdn" -o tsv)
+        curl --fail-with-body --retry 5 --retry-delay 15 \
+          "https://${API_URL}/health"

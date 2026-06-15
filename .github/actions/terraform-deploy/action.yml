@@ -1,0 +1,61 @@
+name: Terraform Deploy
+description: Initialise and apply Terraform for a given environment
+
+inputs:
+  environment:
+    description: Target environment (dev | prod)
+    required: true
+  image_tag:
+    description: Container image tag (git SHA)
+    required: true
+  tf_state_resource_group:
+    description: Resource group holding the Terraform state storage account
+    required: true
+  tf_state_storage_account:
+    description: Storage account name for Terraform state
+    required: true
+  arm_client_id:
+    description: Azure client ID (OIDC)
+    required: true
+  arm_tenant_id:
+    description: Azure tenant ID
+    required: true
+  arm_subscription_id:
+    description: Azure subscription ID
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "~1.5"
+
+    - name: Terraform Init
+      shell: bash
+      working-directory: infra
+      env:
+        ARM_USE_OIDC: "true"
+        ARM_CLIENT_ID: ${{ inputs.arm_client_id }}
+        ARM_TENANT_ID: ${{ inputs.arm_tenant_id }}
+        ARM_SUBSCRIPTION_ID: ${{ inputs.arm_subscription_id }}
+      run: |
+        terraform init \
+          -backend-config="resource_group_name=${{ inputs.tf_state_resource_group }}" \
+          -backend-config="storage_account_name=${{ inputs.tf_state_storage_account }}" \
+          -backend-config="container_name=tfstate" \
+          -backend-config="key=${{ inputs.environment }}.terraform.tfstate"
+
+    - name: Terraform Apply
+      shell: bash
+      working-directory: infra
+      env:
+        ARM_USE_OIDC: "true"
+        ARM_CLIENT_ID: ${{ inputs.arm_client_id }}
+        ARM_TENANT_ID: ${{ inputs.arm_tenant_id }}
+        ARM_SUBSCRIPTION_ID: ${{ inputs.arm_subscription_id }}
+      run: |
+        terraform apply -auto-approve \
+          -var-file="environments/${{ inputs.environment }}.tfvars" \
+          -var="image_tag=${{ inputs.image_tag }}"
